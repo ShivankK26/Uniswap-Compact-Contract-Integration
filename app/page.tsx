@@ -7,14 +7,16 @@ import { Claim } from "../components/Claim";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8" style={{ backgroundColor: '#f9fafb' }}>
       <div className="max-w-6xl mx-auto px-4">
         <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">The Compact Protocol</h1>
-          <p className="text-gray-600 mb-4">
+          <h1 className="text-4xl font-bold mb-2" style={{ color: '#111827' }}>
+            The Compact Protocol
+          </h1>
+          <p className="mb-4" style={{ color: '#4b5563', fontSize: '18px' }}>
             Deposit, withdraw, and manage assets on Uniswap Compact Contract
           </p>
-          <div className="bg-white p-4 rounded-lg border">
+          <div className="bg-white p-4 rounded-lg border" style={{ backgroundColor: '#ffffff', borderColor: '#e5e7eb' }}>
             <WalletConnect />
           </div>
         </header>
@@ -31,10 +33,12 @@ export default function Home() {
           </div>
         </div>
 
-        <footer className="mt-12 pt-8 border-t text-center text-sm text-gray-500">
+        <footer className="mt-12 pt-8 border-t text-center text-sm" style={{ borderTopColor: '#e5e7eb', color: '#6b7280' }}>
           <p>
             Contract Address:{" "}
-            <span className="font-mono">0x00000000000000171ede64904551eeDF3C6C9788</span>
+            <span className="font-mono" style={{ color: '#111827' }}>
+              0x00000000000000171ede64904551eeDF3C6C9788
+            </span>
           </p>
           <p className="mt-2">
             This is a simplified demo interface. For production use, ensure proper allocator

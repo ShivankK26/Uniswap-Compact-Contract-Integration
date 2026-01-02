@@ -63,21 +63,21 @@ export function Deposit() {
 
   if (!isConnected) {
     return (
-      <div className="p-6 border rounded-lg bg-gray-50">
-        <p className="text-gray-600">Please connect your wallet to deposit</p>
+      <div className="p-6 border rounded-lg bg-gray-50" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
+        <p style={{ color: '#4b5563' }}>Please connect your wallet to deposit</p>
       </div>
     );
   }
 
   return (
-    <div className="p-6 border rounded-lg bg-white">
-      <h2 className="text-2xl font-bold mb-4">Deposit Assets</h2>
+    <div className="p-6 border rounded-lg bg-white" style={{ backgroundColor: '#ffffff', borderColor: '#e5e7eb' }}>
+      <h2 className="text-2xl font-bold mb-4" style={{ color: '#111827' }}>Deposit Assets</h2>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Deposit Type</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Deposit Type</label>
           <div className="flex gap-4">
-            <label className="flex items-center">
+            <label className="flex items-center" style={{ color: '#111827' }}>
               <input
                 type="radio"
                 value="native"
@@ -87,7 +87,7 @@ export function Deposit() {
               />
               Native ETH
             </label>
-            <label className="flex items-center">
+            <label className="flex items-center" style={{ color: '#111827' }}>
               <input
                 type="radio"
                 value="erc20"
@@ -102,22 +102,23 @@ export function Deposit() {
 
         {depositType === "erc20" && (
           <div>
-            <label className="block text-sm font-medium mb-2">Token Address</label>
+            <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Token Address</label>
             <input
               type="text"
               value={tokenAddress}
               onChange={(e) => setTokenAddress(e.target.value)}
               placeholder="0x..."
               className="w-full p-2 border rounded"
+              style={{ color: '#111827', borderColor: '#d1d5db' }}
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs mt-1" style={{ color: '#6b7280' }}>
               Note: You must approve this token first before depositing
             </p>
           </div>
         )}
 
         <div>
-          <label className="block text-sm font-medium mb-2">Amount</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Amount</label>
           <input
             type="number"
             value={amount}
@@ -125,29 +126,32 @@ export function Deposit() {
             placeholder="0.0"
             step="0.0001"
             className="w-full p-2 border rounded"
+            style={{ color: '#111827', borderColor: '#d1d5db' }}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Allocator ID</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Allocator ID</label>
           <input
             type="number"
             value={allocatorId}
             onChange={(e) => setAllocatorId(e.target.value)}
             placeholder="0"
             className="w-full p-2 border rounded"
+            style={{ color: '#111827', borderColor: '#d1d5db' }}
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs mt-1" style={{ color: '#6b7280' }}>
             Allocator must be registered. Use 0 for testing with AlwaysOKAllocator.
           </p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Reset Period</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Reset Period</label>
           <select
             value={resetPeriod}
             onChange={(e) => setResetPeriod(Number(e.target.value))}
             className="w-full p-2 border rounded"
+            style={{ color: '#111827', borderColor: '#d1d5db' }}
           >
             <option value={RESET_PERIOD.ONE_MINUTE}>1 Minute</option>
             <option value={RESET_PERIOD.TEN_MINUTES}>10 Minutes</option>
@@ -158,11 +162,12 @@ export function Deposit() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Scope</label>
+          <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>Scope</label>
           <select
             value={scope}
             onChange={(e) => setScope(Number(e.target.value))}
             className="w-full p-2 border rounded"
+            style={{ color: '#111827', borderColor: '#d1d5db' }}
           >
             <option value={SCOPE.SINGLE_CHAIN}>Single Chain</option>
             <option value={SCOPE.MULTICHAIN}>Multichain</option>
@@ -170,13 +175,13 @@ export function Deposit() {
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+          <div className="p-3 bg-red-50 border border-red-200 rounded text-sm" style={{ backgroundColor: '#fef2f2', borderColor: '#fecaca', color: '#991b1b' }}>
             Error: {error.message}
           </div>
         )}
 
         {isSuccess && (
-          <div className="p-3 bg-green-50 border border-green-200 rounded text-green-700 text-sm">
+          <div className="p-3 bg-green-50 border border-green-200 rounded text-sm" style={{ backgroundColor: '#f0fdf4', borderColor: '#bbf7d0', color: '#166534' }}>
             Deposit successful! Transaction: {hash}
           </div>
         )}
