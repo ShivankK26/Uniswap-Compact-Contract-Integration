@@ -3,7 +3,7 @@
 import { WalletConnect } from "../components/WalletConnect";
 import { Deposit } from "../components/Deposit";
 import { Withdraw } from "../components/Withdraw";
-import { TokenIdCalculator } from "../components/TokenIdCalculator";
+
 
 export default function Home() {
   return (
@@ -21,8 +21,6 @@ export default function Home() {
           </div>
         </header>
 
-        <TokenIdCalculator />
-
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <Deposit />
@@ -31,19 +29,6 @@ export default function Home() {
             <Withdraw />
           </div>
         </div>
-
-        <footer className="mt-12 pt-8 border-t text-center text-sm" style={{ borderTopColor: '#e5e7eb', color: '#6b7280' }}>
-          <p>
-            Contract Address:{" "}
-            <span className="font-mono" style={{ color: '#111827' }}>
-              0x00000000000000171ede64904551eeDF3C6C9788
-            </span>
-          </p>
-          <p className="mt-2">
-            This is a simplified demo interface. For production use, ensure proper allocator
-            setup and authorization.
-          </p>
-        </footer>
         </div>
     </div>
   );
