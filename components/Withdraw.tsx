@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { parseEther, formatEther, isAddress } from "viem";
 import { COMPACT_ADDRESS, COMPACT_ABI, createTokenId, encodeClaimant } from "../lib/contracts";
@@ -19,13 +19,35 @@ export function Withdraw() {
     hash,
   });
 
-  // Check forced withdrawal status
-  const { data: forcedWithdrawalStatus } = useReadContract({
+  // Check forced withdrawal status with automatic polling
+  const { data: forcedWithdrawalStatus, refetch: refetchStatus } = useReadContract({
     address: COMPACT_ADDRESS,
     abi: COMPACT_ABI,
     functionName: "getForcedWithdrawalStatus",
     args: tokenId ? [address!, BigInt(tokenId)] : undefined,
-    query: { enabled: !!tokenId && !!address && withdrawType === "forced" },
+    query: { 
+      enabled: !!tokenId && !!address && withdrawType === "forced",
+      // Poll every 5 seconds when forced withdrawal is pending
+      refetchInterval: (query) => {
+        const data = query.state.data;
+        if (!data) return false;
+        const status = data[0];
+        const availableAt = data[1];
+        
+        // If pending, poll every 5 seconds
+        if (status === 1) {
+          const now = BigInt(Math.floor(Date.now() / 1000));
+          // If we're past the time, poll more frequently (every 2 seconds)
+          if (now >= availableAt) {
+            return 2000;
+          }
+          // Otherwise poll every 5 seconds
+          return 5000;
+        }
+        // If enabled or disabled, stop polling
+        return false;
+      },
+    },
   });
 
   // Get balance
@@ -53,6 +75,48 @@ export function Withdraw() {
     }
     return false; // Disabled
   }, [withdrawType, forcedWithdrawalStatus]);
+
+  // Auto-refetch when we're close to the available time
+  useEffect(() => {
+    if (withdrawType !== "forced" || !forcedWithdrawalStatus) return;
+    
+    const status = forcedWithdrawalStatus[0];
+    const availableAt = forcedWithdrawalStatus[1];
+    
+    // Only set up interval if status is pending
+    if (status !== 1) return;
+    
+    const now = BigInt(Math.floor(Date.now() / 1000));
+    const timeUntilAvailable = Number(availableAt - now) * 1000; // Convert to milliseconds
+    
+    // If already available, refetch immediately
+    if (now >= availableAt) {
+      refetchStatus();
+      return;
+    }
+    
+    // Set a timeout to refetch right when it becomes available
+    const timeout = setTimeout(() => {
+      refetchStatus();
+    }, timeUntilAvailable + 1000); // Add 1 second buffer
+    
+    // Also set up an interval to check every second when we're within 30 seconds
+    let interval: NodeJS.Timeout | null = null;
+    if (timeUntilAvailable <= 30000) {
+      interval = setInterval(() => {
+        const currentTime = BigInt(Math.floor(Date.now() / 1000));
+        if (currentTime >= availableAt) {
+          refetchStatus();
+          if (interval) clearInterval(interval);
+        }
+      }, 1000);
+    }
+    
+    return () => {
+      clearTimeout(timeout);
+      if (interval) clearInterval(interval);
+    };
+  }, [withdrawType, forcedWithdrawalStatus, refetchStatus]);
 
   const handleWithdraw = async () => {
     if (!isConnected || !address) {

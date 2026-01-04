@@ -3,7 +3,6 @@
 import { WalletConnect } from "../components/WalletConnect";
 import { Deposit } from "../components/Deposit";
 import { Withdraw } from "../components/Withdraw";
-import { Claim } from "../components/Claim";
 import { TokenIdCalculator } from "../components/TokenIdCalculator";
 
 export default function Home() {
@@ -30,9 +29,6 @@ export default function Home() {
           </div>
           <div className="lg:col-span-1">
             <Withdraw />
-          </div>
-          <div className="lg:col-span-3">
-            <Claim />
           </div>
         </div>
 

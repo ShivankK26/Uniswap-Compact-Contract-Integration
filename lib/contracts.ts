@@ -130,6 +130,53 @@ export const COMPACT_ABI = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [
+      { name: "claimHash", type: "bytes32" },
+      { name: "typehash", type: "bytes32" },
+    ],
+    name: "register",
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { name: "sponsor", type: "address" },
+      { name: "claimHash", type: "bytes32" },
+      { name: "typehash", type: "bytes32" },
+    ],
+    name: "isRegistered",
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "DOMAIN_SEPARATOR",
+    outputs: [{ name: "", type: "bytes32" }],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const;
+
+// IAllocator ABI for checking claim authorization
+export const ALLOCATOR_ABI = [
+  {
+    inputs: [
+      { name: "claimHash", type: "bytes32" },
+      { name: "arbiter", type: "address" },
+      { name: "sponsor", type: "address" },
+      { name: "nonce", type: "uint256" },
+      { name: "expires", type: "uint256" },
+      { name: "idsAndAmounts", type: "uint256[2][]" },
+      { name: "allocatorData", type: "bytes" },
+    ],
+    name: "isClaimAuthorized",
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "view",
+    type: "function",
+  },
 ] as const;
 
 // Helper function to create lockTag
@@ -181,6 +228,24 @@ export function calculateTokenId(
   return createTokenId(lockTag, tokenAddress);
 }
 
+// Helper to extract lockTag from tokenId
+// tokenId = (lockTag << 160) | tokenAddress
+// So lockTag = tokenId >> 160 (upper 96 bits)
+export function extractLockTagFromTokenId(tokenId: bigint): `0x${string}` {
+  const oneSixty = BigInt(160);
+  const lockTagValue = tokenId >> oneSixty;
+  return `0x${lockTagValue.toString(16).padStart(24, "0")}` as `0x${string}`;
+}
+
+// Helper to extract token address from tokenId
+// tokenId = (lockTag << 160) | tokenAddress
+// So tokenAddress = tokenId & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF (lower 160 bits)
+export function extractTokenFromTokenId(tokenId: bigint): `0x${string}` {
+  const mask = (BigInt(1) << BigInt(160)) - BigInt(1);
+  const tokenValue = tokenId & mask;
+  return `0x${tokenValue.toString(16).padStart(40, "0")}` as `0x${string}`;
+}
+
 // Helper to encode claimant (lockTag + recipient)
 export function encodeClaimant(lockTag: `0x${string}`, recipient: `0x${string}`): bigint {
   const lockTagValue = BigInt(lockTag);
@@ -203,4 +268,8 @@ export const SCOPE = {
   SINGLE_CHAIN: 0,
   MULTICHAIN: 1,
 } as const;
+
+// COMPACT_TYPEHASH from The Compact contract
+// keccak256(bytes("Compact(address arbiter,address sponsor,uint256 nonce,uint256 expires,bytes12 lockTag,address token,uint256 amount)"))
+export const COMPACT_TYPEHASH = "0x73b631296de001508966ddfc334593ad8f850ccd3be4d2c58a9ed469844eebc7" as const;
 
