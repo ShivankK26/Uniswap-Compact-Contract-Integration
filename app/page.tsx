@@ -11,7 +11,7 @@ export default function Home() {
       <div className="max-w-6xl mx-auto px-4">
         <header className="mb-8">
           <h1 className="text-4xl font-bold mb-2" style={{ color: '#111827' }}>
-            The Compact Protocol
+            Uniswap Compact Contract
           </h1>
           <p className="mb-4" style={{ color: '#4b5563', fontSize: '18px' }}>
             Deposit, withdraw, and manage assets on Uniswap Compact Contract
