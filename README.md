@@ -17,7 +17,6 @@ yarn install
 2. Set up Privy credentials:
    - Create a `.env.local` file (or use existing `.env`)
    - Add: `NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id`
-   - The app will also check for `PRIVY_APP_ID` if `NEXT_PUBLIC_PRIVY_APP_ID` is not set
 
 3. Run the development server:
 ```bash
@@ -105,7 +104,3 @@ epoch-assignment/
 - **Viem**: Ethereum utilities
 - **TypeScript**: Type safety
 - **Tailwind CSS**: Styling
-
-## License
-
-MIT
