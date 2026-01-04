@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { parseEther, formatEther, isAddress } from "viem";
-import { COMPACT_ADDRESS, COMPACT_ABI, createLockTag, RESET_PERIOD, SCOPE } from "../lib/contracts";
+import { parseEther, isAddress } from "viem";
+import { COMPACT_ADDRESS, COMPACT_ABI, createLockTag, calculateTokenId, RESET_PERIOD, SCOPE } from "../lib/contracts";
 
 export function Deposit() {
   const { address, isConnected } = useAccount();
@@ -18,6 +18,23 @@ export function Deposit() {
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
+  // Calculate token ID when deposit parameters change
+  const tokenId = useMemo(() => {
+    if (allocatorId && (depositType === "native" || (depositType === "erc20" && tokenAddress && isAddress(tokenAddress)))) {
+      try {
+        const calculatedId = calculateTokenId(
+          BigInt(allocatorId),
+          scope,
+          resetPeriod,
+          depositType === "native" ? "0x0000000000000000000000000000000000000000" : tokenAddress as `0x${string}`
+        );
+        return calculatedId.toString();
+      } catch {
+        return "";
+      }
+    }
+    return "";
+  }, [allocatorId, scope, resetPeriod, depositType, tokenAddress]);
 
   const handleDeposit = async () => {
     if (!isConnected || !address) {
@@ -182,7 +199,20 @@ export function Deposit() {
 
         {isSuccess && (
           <div className="p-3 bg-green-50 border border-green-200 rounded text-sm" style={{ backgroundColor: '#f0fdf4', borderColor: '#bbf7d0', color: '#166534' }}>
-            Deposit successful! Transaction: {hash}
+            <div className="font-bold mb-2">✓ Deposit successful!</div>
+            <div className="mb-2">Transaction: <span className="font-mono text-xs">{hash?.slice(0, 20)}...</span></div>
+            {tokenId && (
+              <div className="mt-2 p-2 bg-white rounded border" style={{ borderColor: '#bbf7d0' }}>
+                <div className="text-xs font-semibold mb-1">Your Token ID (use this for withdrawal):</div>
+                <div className="flex items-center gap-2">
+                  <div className="font-mono text-xs break-all flex-1" style={{ color: '#111827' }}>{tokenId}</div>
+                  
+                </div>
+                <div className="text-xs mt-1" style={{ color: '#6b7280' }}>
+                  Paste this Token ID in the Withdraw section to withdraw your assets!
+                </div>
+              </div>
+            )}
           </div>
         )}
 

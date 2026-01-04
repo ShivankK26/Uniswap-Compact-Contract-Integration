@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { parseEther, formatEther, isAddress } from "viem";
 import { COMPACT_ADDRESS, COMPACT_ABI, createTokenId, encodeClaimant } from "../lib/contracts";
@@ -36,6 +36,23 @@ export function Withdraw() {
     args: address && tokenId ? [address, BigInt(tokenId)] : undefined,
     query: { enabled: !!address && !!tokenId },
   });
+
+  // Check if forced withdrawal is available
+  const isForcedWithdrawalAvailable = useMemo(() => {
+    if (withdrawType !== "forced" || !forcedWithdrawalStatus) return true; // Allow normal withdrawals
+    
+    const status = forcedWithdrawalStatus[0];
+    const availableAt = forcedWithdrawalStatus[1];
+    
+    // Status: 0 = Disabled, 1 = Pending, 2 = Enabled
+    if (status === 2) return true; // Enabled
+    if (status === 1) {
+      // Pending - check if current time >= availableAt
+      const now = BigInt(Math.floor(Date.now() / 1000));
+      return now >= availableAt;
+    }
+    return false; // Disabled
+  }, [withdrawType, forcedWithdrawalStatus]);
 
   const handleWithdraw = async () => {
     if (!isConnected || !address) {
@@ -268,12 +285,29 @@ export function Withdraw() {
 
         <button
           onClick={handleWithdraw}
-          disabled={isPending || isConfirming}
-          className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          disabled={isPending || isConfirming || (withdrawType === "forced" && !isForcedWithdrawalAvailable)}
+          className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+          title={withdrawType === "forced" && !isForcedWithdrawalAvailable ? "Wait for the reset period to complete before withdrawing" : undefined}
         >
-          {isPending || isConfirming ? "Processing..." : "Withdraw"}
+          {withdrawType === "forced" && !isForcedWithdrawalAvailable ? (
+            <>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span>Withdraw (Available Soon)</span>
+            </>
+          ) : (
+            <>
+              {isPending || isConfirming ? "Processing..." : "Withdraw"}
+            </>
+          )}
         </button>
+        {withdrawType === "forced" && !isForcedWithdrawalAvailable && forcedWithdrawalStatus && (
+          <div className="p-2 bg-yellow-50 border border-yellow-200 rounded text-xs" style={{ backgroundColor: '#fefce8', borderColor: '#fde047', color: '#854d0e' }}>
+            🔒 Withdrawal is locked. Wait until {forcedWithdrawalStatus[1] > BigInt(0) ? new Date(Number(forcedWithdrawalStatus[1]) * 1000).toLocaleString() : "the reset period completes"} to withdraw.
+          </div>
+        )}
       </div>
     </div>
   );

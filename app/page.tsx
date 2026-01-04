@@ -4,6 +4,7 @@ import { WalletConnect } from "../components/WalletConnect";
 import { Deposit } from "../components/Deposit";
 import { Withdraw } from "../components/Withdraw";
 import { Claim } from "../components/Claim";
+import { TokenIdCalculator } from "../components/TokenIdCalculator";
 
 export default function Home() {
   return (
@@ -20,6 +21,8 @@ export default function Home() {
             <WalletConnect />
           </div>
         </header>
+
+        <TokenIdCalculator />
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div className="lg:col-span-2">

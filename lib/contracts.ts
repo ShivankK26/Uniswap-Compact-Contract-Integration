@@ -161,11 +161,24 @@ export function parseLockTag(lockTag: `0x${string}`) {
 }
 
 // Helper to create tokenId from lockTag and token address
+// tokenId = (lockTag << 160) | tokenAddress
 export function createTokenId(lockTag: `0x${string}`, tokenAddress: `0x${string}`): bigint {
   const lockTagValue = BigInt(lockTag);
   const tokenValue = BigInt(tokenAddress);
   const oneSixty = BigInt(160);
   return (lockTagValue << oneSixty) | tokenValue;
+}
+
+// Helper to calculate token ID from deposit parameters
+// For native ETH, use address(0)
+export function calculateTokenId(
+  allocatorId: bigint,
+  scope: number,
+  resetPeriod: number,
+  tokenAddress: `0x${string}` = "0x0000000000000000000000000000000000000000"
+): bigint {
+  const lockTag = createLockTag(allocatorId, scope, resetPeriod);
+  return createTokenId(lockTag, tokenAddress);
 }
 
 // Helper to encode claimant (lockTag + recipient)
