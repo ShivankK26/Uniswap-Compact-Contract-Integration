@@ -121,7 +121,10 @@ export const COMPACT_ABI = [
     type: "function",
   },
   {
-    inputs: [],
+    inputs: [
+      { name: "allocator", type: "address" },
+      { name: "proof", type: "bytes" },
+    ],
     name: "__registerAllocator",
     outputs: [{ name: "allocatorId", type: "uint96" }],
     stateMutability: "nonpayable",
@@ -130,28 +133,30 @@ export const COMPACT_ABI = [
 ] as const;
 
 // Helper function to create lockTag
-// lockTag encodes: allocatorId (96 bits), scope (1 bit), resetPeriod (7 bits)
+// lockTag encodes: scope (bit 95), resetPeriod (bits 92-94), allocatorId (bits 0-91)
+// Based on: scope << 95 | resetPeriod << 92 | allocatorId
 export function createLockTag(
   allocatorId: bigint,
   scope: number, // 0 = SingleChain, 1 = Multichain
-  resetPeriod: number // 0-127
+  resetPeriod: number // 0-7 (ResetPeriod enum)
 ): `0x${string}` {
-  // Pack: allocatorId (96 bits) | scope (1 bit) | resetPeriod (7 bits)
-  const eight = BigInt(8);
-  const packed = (allocatorId << eight) | BigInt((scope << 7) | resetPeriod);
+  // Pack: scope at bit 95, resetPeriod at bits 92-94, allocatorId at bits 0-91
+  const ninetyFive = BigInt(95);
+  const ninetyTwo = BigInt(92);
+  const packed = (BigInt(scope) << ninetyFive) | (BigInt(resetPeriod) << ninetyTwo) | allocatorId;
   return `0x${packed.toString(16).padStart(24, "0")}` as `0x${string}`;
 }
 
 // Helper to extract lockTag components
 export function parseLockTag(lockTag: `0x${string}`) {
   const value = BigInt(lockTag);
-  const sevenF = BigInt(0x7f);
+  const ninetyFive = BigInt(95);
+  const ninetyTwo = BigInt(92);
   const seven = BigInt(7);
-  const eight = BigInt(8);
   const one = BigInt(1);
-  const resetPeriod = Number(value & sevenF);
-  const scope = Number((value >> seven) & one);
-  const allocatorId = value >> eight;
+  const scope = Number((value >> ninetyFive) & one);
+  const resetPeriod = Number((value >> ninetyTwo) & seven);
+  const allocatorId = value & ((one << ninetyTwo) - one); // Mask for bits 0-91
   return { allocatorId, scope, resetPeriod };
 }
 

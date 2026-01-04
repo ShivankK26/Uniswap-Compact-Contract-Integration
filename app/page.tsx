@@ -45,7 +45,7 @@ export default function Home() {
             setup and authorization.
           </p>
         </footer>
-      </div>
+        </div>
     </div>
   );
 }
